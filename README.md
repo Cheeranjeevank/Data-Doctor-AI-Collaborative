@@ -159,7 +159,7 @@ UPLOAD_DIR=./data/raw
 
 ## 👥 Team
 
-**Team ALT_CODE** — Hackathon 2026
+**Team ALT_CODE** 
 
 ---
 
