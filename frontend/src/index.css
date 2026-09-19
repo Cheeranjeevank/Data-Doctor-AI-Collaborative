@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0f172a;
+  --color-surface: #1e293b;
+  --color-primary: #3b82f6;
+  --color-primary-200: #bfdbfe;
+  --color-secondary: #8b5cf6;
+  --color-accent: #10b981;
+  --color-danger: #ef4444;
+  --color-warning: #eab308;
+  --font-sans: 'Inter', sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: #e2e8f0; /* slate-200 */
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  ::selection {
+    background-color: rgb(59 130 246 / 0.3); /* primary/30 */
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background-color: var(--color-background);
+}
+::-webkit-scrollbar-thumb {
+  background-color: #475569; /* slate-600 */
+  border-radius: 9999px;
+  transition: background-color 0.2s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #64748b; /* slate-500 */
+}
+
+/* Glassmorphism utilities */
+.glass-panel {
+  background-color: rgb(30 41 59 / 0.8); /* surface/80 */
+  backdrop-filter: blur(12px);
+  border: 1px solid rgb(51 65 85 / 0.5); /* slate-700/50 */
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}

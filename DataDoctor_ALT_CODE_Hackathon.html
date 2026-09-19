@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DataDoctor Collaborative — ALT_CODE | Hackathon 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #6366f1; --primary-light: #818cf8; --secondary: #10b981;
+      --danger: #ef4444; --amber: #f59e0b;
+      --bg: #020617; --surface: #0f172a; --surface2: #1e293b;
+      --border: #334155; --text: #f1f5f9; --muted: #94a3b8;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
+    .slides { position: relative; width: 100vw; height: 100vh; }
+    .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 48px 64px; opacity: 0; transform: translateX(60px); transition: opacity 0.5s ease, transform 0.5s ease; pointer-events: none; }
+    .slide.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+    .slide.exit { opacity: 0; transform: translateX(-60px); }
+    .orb { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
+    .orb-1 { width: 600px; height: 600px; background: rgba(99,102,241,0.15); top: -200px; right: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: rgba(16,185,129,0.12); bottom: -100px; left: -100px; }
+    .slide > * { position: relative; z-index: 1; }
+    .nav { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 16px; background: rgba(15,23,42,0.8); border: 1px solid var(--border); border-radius: 48px; padding: 12px 24px; backdrop-filter: blur(12px); z-index: 100; }
+    .nav button { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 20px; border-radius: 24px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+    .nav button:hover { background: var(--primary); border-color: var(--primary); }
+    .dots { display: flex; gap: 8px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); cursor: pointer; transition: all 0.3s; }
+    .dot.active { background: var(--primary); width: 24px; border-radius: 4px; }
+    .team-badge { position: fixed; top: 24px; right: 32px; z-index: 100; background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.4); color: var(--primary-light); padding: 6px 16px; border-radius: 24px; font-size: 12px; font-weight: 700; letter-spacing: 1px; }
+    .slide-counter { position: fixed; top: 24px; left: 32px; z-index: 100; color: var(--muted); font-size: 12px; font-weight: 500; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--primary-light); margin-bottom: 16px; }
+    .headline { font-family: 'Space Grotesk', sans-serif; font-size: clamp(28px, 4vw, 52px); font-weight: 700; line-height: 1.1; margin-bottom: 20px; }
+    .headline span { background: linear-gradient(135deg, var(--primary-light), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .subtitle { font-size: clamp(13px, 1.6vw, 17px); color: var(--muted); line-height: 1.7; max-width: 700px; }
+    .card-grid { display: grid; gap: 20px; width: 100%; max-width: 1000px; }
+    .card-grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .card-grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; transition: all 0.3s; }
+    .card:hover { border-color: var(--primary); transform: translateY(-2px); }
+    .card-icon { font-size: 26px; margin-bottom: 10px; }
+    .card h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--text); font-family: 'Space Grotesk', sans-serif; }
+    .card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .stat-block { text-align: center; padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; }
+    .stat-number { font-family: 'Space Grotesk', sans-serif; font-size: 40px; font-weight: 700; background: linear-gradient(135deg, var(--primary-light), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-label { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 24px; font-size: 12px; font-weight: 600; }
+    .tag-primary { background: rgba(99,102,241,0.15); color: var(--primary-light); border: 1px solid rgba(99,102,241,0.3); }
+    .tag-green { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .tag-amber { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+    .tag-red { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+    .flow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .flow-node { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 18px; text-align: center; min-width: 110px; }
+    .flow-node .node-icon { font-size: 20px; margin-bottom: 6px; }
+    .flow-node .node-label { font-size: 12px; font-weight: 600; color: var(--text); }
+    .flow-node .node-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .flow-node.highlight { border-color: var(--primary); background: rgba(99,102,241,0.1); }
+    .flow-arrow { color: var(--muted); font-size: 20px; }
+    .check-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+    .check-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .check-list li .icon { font-size: 18px; margin-top: 1px; flex-shrink: 0; }
+    .check-list li strong { color: var(--text); }
+    .divider { width: 60px; height: 3px; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 2px; margin: 20px 0; }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    .float { animation: float 3s ease-in-out infinite; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .slide.active .card:nth-child(1) { animation: fadeInUp 0.4s 0.1s ease both; }
+    .slide.active .card:nth-child(2) { animation: fadeInUp 0.4s 0.2s ease both; }
+    .slide.active .card:nth-child(3) { animation: fadeInUp 0.4s 0.3s ease both; }
+    .slide.active .card:nth-child(4) { animation: fadeInUp 0.4s 0.4s ease both; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; width: 100%; max-width: 1100px; align-items: center; }
+    .col-left { text-align: left; }
+    .col-right { display: flex; flex-direction: column; gap: 16px; }
+    .problem-stat { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 12px; padding: 18px 24px; }
+    .problem-stat .num { font-size: 32px; font-weight: 800; color: #f87171; font-family: 'Space Grotesk', sans-serif; }
+    .problem-stat .desc { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .tech-stack { display: flex; flex-wrap: wrap; gap: 8px; }
+    .roadmap-item { display: flex; gap: 14px; align-items: flex-start; }
+    .roadmap-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+    .roadmap-line { display: flex; flex-direction: column; gap: 14px; }
+    .roadmap-content h4 { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+    .roadmap-content p { font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="team-badge">&#9889; TEAM ALT_CODE</div>
+  <div class="slide-counter" id="counter">Slide 1 of 7</div>
+
+  <div class="slides">
+    <!-- SLIDE 1: TITLE -->
+    <div class="slide active" id="slide-1" style="text-align:center">
+      <div class="float" style="width:80px;height:80px;background:linear-gradient(135deg,#6366f1,#10b981);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 24px;box-shadow:0 0 60px rgba(99,102,241,0.4);">&#129338;</div>
+      <div class="eyebrow">Hackathon 2026 &middot; Team ALT_CODE</div>
+      <h1 class="headline">DataDoctor <span>Collaborative</span></h1>
+      <p style="font-size:clamp(13px,1.4vw,17px);color:#10b981;font-style:italic;margin-bottom:20px;">"AI that diagnoses your data &mdash; and knows when to ask a human."</p>
+      <p class="subtitle">A production-grade AI platform that detects anomalies in your data pipelines, diagnoses root causes with statistical engines, and collaborates with humans to resolve edge cases &mdash; in real time.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px;">
+        <span class="tag tag-primary">&#129302; Gemini 3.6 AI Engine</span>
+        <span class="tag tag-green">&#128013; FastAPI Backend</span>
+        <span class="tag tag-amber">&#9883;&#65039; React + Vite Frontend</span>
+        <span class="tag tag-red">&#128202; Pandas + Scikit-learn</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: PROBLEM -->
+    <div class="slide" id="slide-2">
+      <div class="two-col">
+        <div class="col-left">
+          <div class="eyebrow">The Problem</div>
+          <h2 class="headline">Bad data costs <span>billions.</span><br/>Nobody knows why.</h2>
+          <div class="divider"></div>
+          <ul class="check-list">
+            <li><span class="icon">&#128680;</span><div><strong>Pipelines fail silently.</strong> Broken ingestion corrupts dashboards for hours before anyone notices.</div></li>
+            <li><span class="icon">&#128269;</span><div><strong>Root cause is a black box.</strong> Was it a bug, schema change, or a real business shift? Engineers spend hours guessing.</div></li>
+            <li><span class="icon">&#128100;</span><div><strong>AI alone is not enough.</strong> Pure automation has blind spots &mdash; it cannot know if a drop is a migration or an incident.</div></li>
+            <li><span class="icon">&#8987;</span><div><strong>MTTR is too long.</strong> Every minute of bad data means wrong decisions at the executive level.</div></li>
+          </ul>
+        </div>
+        <div class="col-right">
+          <div class="problem-stat"><div class="num">$12.9M</div><div class="desc">Average annual cost of poor data quality per organization (Gartner, 2023)</div></div>
+          <div class="problem-stat"><div class="num" style="color:#fbbf24">47%</div><div class="desc">Of data professionals' time spent cleaning data rather than generating insights</div></div>
+          <div class="problem-stat"><div class="num" style="color:#34d399">3.2 hrs</div><div class="desc">Average time to detect a data anomaly in pipelines without automated monitoring</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: SOLUTION -->
+    <div class="slide" id="slide-3">
+      <div style="text-align:center;max-width:900px;width:100%">
+        <div class="eyebrow">Our Solution</div>
+        <h2 class="headline">One platform. Three <span>superpowers.</span></h2>
+        <div class="divider" style="margin:20px auto;"></div>
+        <div class="card-grid card-grid-3">
+          <div class="card"><div class="card-icon">&#128300;</div><h3>Intelligent Profiling</h3><p>Upload any dataset (CSV, JSON, XLSX). Our Pandas engine automatically computes per-column statistics: missing rates, distributions, outlier scores &mdash; in seconds.</p></div>
+          <div class="card" style="border-color:var(--primary)"><div class="card-icon">&#128680;</div><h3>Anomaly Detection</h3><p>Three statistical algorithms run simultaneously: Z-Score, IQR Fencing, and Missing Value Spike detection flag data quality issues with severity and confidence scores.</p></div>
+          <div class="card"><div class="card-icon">&#129309;</div><h3>Human-AI Collaboration</h3><p>When AI confidence drops, it escalates to a human via a live chat interface and asks a precise, targeted question to resolve the ambiguity intelligently.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: ARCHITECTURE -->
+    <div class="slide" id="slide-4">
+      <div style="text-align:center;width:100%;max-width:1050px">
+        <div class="eyebrow">Technical Architecture</div>
+        <h2 class="headline">Production-grade <span>full-stack AI</span> platform</h2>
+        <div class="divider" style="margin:14px auto 28px;"></div>
+        <div class="flow" style="margin-bottom:28px;">
+          <div class="flow-node"><div class="node-icon">&#128193;</div><div class="node-label">Data Source</div><div class="node-sub">CSV / JSON / XLSX</div></div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node highlight"><div class="node-icon">&#9881;&#65039;</div><div class="node-label">Profiling Engine</div><div class="node-sub">Pandas + NumPy</div></div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node highlight"><div class="node-icon">&#129514;</div><div class="node-label">Anomaly Detector</div><div class="node-sub">Z-Score &middot; IQR &middot; Missing</div></div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node highlight"><div class="node-icon">&#129504;</div><div class="node-label">DataDoctor AI</div><div class="node-sub">Gemini 3.6 Flash</div></div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node"><div class="node-icon">&#128100;</div><div class="node-label">Human Collab</div><div class="node-sub">Chat Interface</div></div>
+        </div>
+        <div class="card-grid card-grid-2">
+          <div class="card"><h3>&#128013; Backend Stack</h3><div class="tech-stack" style="margin-top:12px"><span class="tag tag-green">FastAPI</span><span class="tag tag-green">Python 3.12</span><span class="tag tag-green">SQLAlchemy</span><span class="tag tag-green">SQLite / PostgreSQL</span><span class="tag tag-green">Pandas</span><span class="tag tag-green">NumPy</span><span class="tag tag-green">Scikit-learn</span></div></div>
+          <div class="card"><h3>&#9883;&#65039; Frontend Stack</h3><div class="tech-stack" style="margin-top:12px"><span class="tag tag-primary">React 18 + TypeScript</span><span class="tag tag-primary">Vite</span><span class="tag tag-primary">Tailwind CSS v4</span><span class="tag tag-primary">Framer Motion</span><span class="tag tag-primary">React Flow</span><span class="tag tag-primary">Recharts</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: FEATURES -->
+    <div class="slide" id="slide-5">
+      <div style="text-align:center;width:100%;max-width:1000px">
+        <div class="eyebrow">Platform Features</div>
+        <h2 class="headline">Built for the <span>live demo.</span></h2>
+        <div class="divider" style="margin:16px auto 24px;"></div>
+        <div class="card-grid card-grid-2">
+          <div class="card"><div class="card-icon">&#9203;</div><h3>Time Travel Simulator</h3><p>Click "Inject Pipeline Failure" and watch the dashboard react live &mdash; charts drop, the Knowledge Graph pulses red, and the AI begins its diagnostic sequence.</p></div>
+          <div class="card"><div class="card-icon">&#128378;</div><h3>Pipeline Knowledge Graph</h3><p>An interactive React Flow diagram maps every data node. When failure is detected, the root cause node is visually highlighted showing the exact blast radius.</p></div>
+          <div class="card"><div class="card-icon">&#128172;</div><h3>AI Dataset Q&amp;A</h3><p>Ask any natural-language question about your uploaded data. DataDoctor AI reads the real dataset and answers with precise statistics and clear explanations.</p></div>
+          <div class="card"><div class="card-icon">&#128176;</div><h3>Financial Impact Estimator</h3><p>Anomalies are translated into business impact. A data quality issue says "This is masking an estimated $14,200 in revenue" &mdash; not just "missing values."</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: AI ENGINE -->
+    <div class="slide" id="slide-6">
+      <div class="two-col">
+        <div class="col-left">
+          <div class="eyebrow">The AI Engine</div>
+          <h2 class="headline">Custom-built <span>DataDoctor AI</span></h2>
+          <div class="divider"></div>
+          <ul class="check-list">
+            <li><span class="icon">&#129518;</span><div><strong>Persona-driven agent.</strong> Custom system prompt makes Gemini behave as a specialized Data Reliability Engineer, not a generic chatbot.</div></li>
+            <li><span class="icon">&#128202;</span><div><strong>Dataset context injection.</strong> Before every response, the AI receives the full column schema, statistical profiles, and sample rows as structured context.</div></li>
+            <li><span class="icon">&#127919;</span><div><strong>Precision escalation.</strong> When confidence is low, the AI generates a targeted, specific question &mdash; not a generic "I don't know."</div></li>
+            <li><span class="icon">&#9889;</span><div><strong>Gemini 3.6 Flash.</strong> Latest Google GenAI model with sub-3-second response times for seamless live demonstration.</div></li>
+          </ul>
+        </div>
+        <div class="col-right">
+          <div class="card" style="border-color:var(--primary);background:rgba(99,102,241,0.05);">
+            <h3 style="color:var(--primary-light);margin-bottom:12px;">Sample AI Response</h3>
+            <div style="background:var(--bg);border-radius:10px;padding:14px;font-size:13px;color:var(--muted);line-height:1.7;font-family:monospace;">
+              <span style="color:#34d399;">DataDoctor AI:</span><br/>
+              I've analyzed <strong style="color:var(--text)">Airline Dataset.csv</strong><br/>
+              (98,619 rows x 15 cols)<br/><br/>
+              <strong style="color:var(--text)">Avg passenger age: 45.50 years</strong><br/>
+              Unique nationalities: 240<br/>
+              <span style="color:var(--primary-light)">&#10003; No anomalies detected. Dataset is clean.</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;">
+            <div class="stat-block" style="flex:1"><div class="stat-number" style="font-size:26px">3.6</div><div class="stat-label">Gemini Model</div></div>
+            <div class="stat-block" style="flex:1"><div class="stat-number" style="font-size:26px">&lt;3s</div><div class="stat-label">Response Time</div></div>
+            <div class="stat-block" style="flex:1"><div class="stat-number" style="font-size:26px">3</div><div class="stat-label">Detectors</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: IMPACT -->
+    <div class="slide" id="slide-7">
+      <div style="text-align:center;width:100%;max-width:1000px">
+        <div class="eyebrow">Impact &amp; Future Roadmap</div>
+        <h2 class="headline">DataDoctor <span>changes the game</span><br/>for data teams.</h2>
+        <div class="divider" style="margin:16px auto 24px;"></div>
+        <div class="card-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;">
+          <div class="stat-block"><div class="stat-number">90%</div><div class="stat-label">Reduction in time to detect pipeline anomalies</div></div>
+          <div class="stat-block"><div class="stat-number">$0</div><div class="stat-label">Cost for AI queries &mdash; Gemini free tier, fully scalable</div></div>
+          <div class="stat-block"><div class="stat-number">100%</div><div class="stat-label">Every AI decision is logged and explainable</div></div>
+        </div>
+        <div class="card-grid card-grid-2">
+          <div class="card" style="text-align:left;">
+            <h3>&#128508; Next Steps</h3>
+            <div class="roadmap-line" style="margin-top:14px;">
+              <div class="roadmap-item"><div class="roadmap-dot" style="background:rgba(99,102,241,0.2);color:var(--primary-light);">1</div><div class="roadmap-content"><h4>Real-time streaming</h4><p>Kafka / WebSocket integration for live pipeline monitoring</p></div></div>
+              <div class="roadmap-item"><div class="roadmap-dot" style="background:rgba(16,185,129,0.2);color:#34d399;">2</div><div class="roadmap-content"><h4>Multi-source connectors</h4><p>Snowflake, BigQuery, dbt, Airflow native integrations</p></div></div>
+              <div class="roadmap-item"><div class="roadmap-dot" style="background:rgba(245,158,11,0.2);color:#fbbf24;">3</div><div class="roadmap-content"><h4>Self-healing pipelines</h4><p>AI auto-generates remediation scripts once root cause is confirmed</p></div></div>
+            </div>
+          </div>
+          <div class="card" style="text-align:center;background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(16,185,129,0.05));border-color:rgba(99,102,241,0.4);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;">
+            <div style="font-size:44px;">&#129338;</div>
+            <h3 style="font-size:20px;">Thank You!</h3>
+            <p style="color:var(--muted);font-size:13px;">DataDoctor Collaborative &middot; Team ALT_CODE</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+              <span class="tag tag-primary">GitHub: /DataDoctor</span>
+              <span class="tag tag-green">Demo: localhost:5173</span>
+            </div>
+            <p style="font-size:11px;color:var(--muted);font-style:italic;margin-top:4px;">"AI that diagnoses your data &mdash; and knows when to ask a human."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav">
+    <button onclick="changeSlide(-1)">&larr; Prev</button>
+    <div class="dots" id="dots"></div>
+    <button onclick="changeSlide(1)">Next &rarr;</button>
+  </div>
+
+  <script>
+    let current = 0;
+    const total = 7;
+    const slides = document.querySelectorAll('.slide');
+    const counter = document.getElementById('counter');
+    const dotsContainer = document.getElementById('dots');
+
+    for (let i = 0; i < total; i++) {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i === 0 ? ' active' : '');
+      d.onclick = () => goTo(i);
+      dotsContainer.appendChild(d);
+    }
+
+    function updateDots() {
+      document.querySelectorAll('.dot').forEach((d, i) => {
+        d.className = 'dot' + (i === current ? ' active' : '');
+      });
+    }
+
+    function goTo(n) {
+      if (n === current) return;
+      slides[current].classList.remove('active');
+      slides[current].classList.add('exit');
+      const old = current;
+      current = Math.max(0, Math.min(total - 1, n));
+      setTimeout(() => {
+        slides[old].classList.remove('exit');
+        slides[current].classList.add('active');
+        counter.textContent = 'Slide ' + (current + 1) + ' of ' + total;
+        updateDots();
+      }, 50);
+    }
+
+    function changeSlide(dir) {
+      const next = current + dir;
+      if (next < 0 || next >= total) return;
+      goTo(next);
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') changeSlide(1);
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+    });
+  </script>
+</body>
+</html>
